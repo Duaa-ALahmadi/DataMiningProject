@@ -1,0 +1,326 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# The names of the students :
+# / Abeer Abdullah Hindi Al-Juhani   3209798
+# / Batoul Khaled Al-Hajjaji   3750114 
+# / Doaa Khader Al-Ahmadi   3952004
+# 
+
+# In[31]:
+
+
+pip install Graphviz
+
+
+# In[64]:
+
+
+import matplotlib.pyplot as plt 
+import seaborn as sns 
+import pandas as pd 
+import numpy as np 
+import graphviz
+import os
+from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn import datasets
+sns.set(color_codes = True)
+get_ipython().run_line_magic('matplotlib', 'inline')
+seed = 10
+
+
+# In[65]:
+
+
+dd = pd.read_csv('C:/Users/Duaa_/Downloads/data_banknote_authentication.txt', delimiter="," ,
+                  names =['Variance of Wavelet Transformed image',
+                                'Skewness of Wavelet Transformed image',
+                                'Curtosis of Wavelet Transformed image',
+                                'Entropy of image','Status'])
+dd.head(None)
+
+
+# We used the code to upload our data to the project file for testing.
+
+# In[66]:
+
+
+dd.info()
+
+
+# In Figure 2 shows us that Info(): It returns the names of the columns, the number of records in the data frame, the size of the frame in the memory, in addition to the type of data in each frame and all data in the dataset are numeric and the data type are int64 and float64 appears.
+
+# In[67]:
+
+
+dd.isnull().any()
+
+
+# In figure 3 Show us if there is any missing data if it appears False. This means that there are no missing data in this column. However, if the word True appears, it means that there are missing data and it must be dealt with before starting work.
+
+# In[68]:
+
+
+dd.isnull().sum()
+
+
+# In[69]:
+
+
+dd.describe()
+
+
+# Provide us with a lot of statistical information such as: average calculation, median ,number of records in each frame, standard deviation and so on.
+
+# In[70]:
+
+
+dd.corr()
+
+
+# In figure 4 we used to find the pairwise correlation of all columns in the data frame with numeric data only. correlation of a variable with itself is1, and we notice that "Entropy of image" and "Curtosis of Wavelet Transformed image" have correlation
+
+# In[71]:
+
+
+print(dd.shape)
+
+
+# In figure 6 shows the structure of the dataset have 5 columns, 1372 rows.
+
+# In[72]:
+
+
+print(dd["Status"].value_counts())
+dd["Status"].hist()
+
+
+# In figure 7 shows that the Status column has two values, the first value of 0, which means that forged money equals 762 rows, and that value 1 means that the money is genuine equal to 610 rows.
+
+# In[73]:
+
+
+for ojha, feature in enumerate(list(dd.columns)[:-1]):
+    fg = sns.FacetGrid(dd, hue='Status', height=5)
+    fg.map(sns.distplot, feature ).add_legend()
+    plt.show()
+
+
+# In the previous figure, the column Variance of Wavelet Transformed
+# image was compared with column Status with all value, which shows us
+# the frequency distribution for each of the value 0, which means (Forged)
+# and the other value is 1, which means (genuine). We note the highest
+# iterations of the value 0 were between two periods of 2.5 To 5 We also find
+# that the highest frequency of occurrences of the value 1 was between two
+# periods which are from -2.5 to 0 and that the interactions between them are
+# also between two periods which are from -2.5 to 2.5 approximately, which
+# means that the greater the interactions between them, the similarity ratio is
+# a value Mean close to each other
+# 
+# 
+# In the previous figure, the column Entropy of image was compared with
+# column Status with all value, which shows us the frequency distribution
+# for each of the value 0, which means (Forged) and the other value is 1,
+# which means (genuine). We note the highest iterations of the value 0 were
+# between two periods of 0 To 1 We also find that the highest frequency of
+# occurrences of the value 1 was between two periods which are from 0 to 1
+# and that the interactions between them are also between two periods which
+# are from -8 to 2 approximately, which means that the greater the
+# interactions between them, the similarity ratio is a value Mean is very
+# similar because the values are very close to each other.
+
+# In[74]:
+
+
+aa=dd[(~dd["Status"].isin(dd)) & (dd["Status"] ==0)]
+print(aa.mean())
+bb=dd[(~dd["Status"].isin(dd)) & (dd["Status"] ==1)]
+print(bb.mean())
+
+
+# In[75]:
+
+
+sns.boxplot(x='Status',y='Variance of Wavelet Transformed image', data=dd)
+plt.show()
+sns.boxplot(x='Status',y='Skewness of Wavelet Transformed image', data=dd)
+plt.show()
+sns.boxplot(x='Status',y='Curtosis of Wavelet Transformed image', data=dd)
+plt.show()
+sns.boxplot(x='Status',y='Entropy of image', data=dd)
+plt.show()
+
+
+# In figure 8 shows a square containing three data: the first quartile is equal
+# to -1.773, the Median is the line in the middle of the big square is equal to
+# 0.49618, the third quartile is equal to 2.821475, and the points are outliers
+# in "Variance of Wavelet Transformed image" column for each "Status".
+# 
+# 
+# 
+# In figure 9 shows a square containing three data: the first quartile is equal
+# to -1.7082, the Median is the line in the middle of the big square is equal
+# to 2.31965, the third quartile is equal to 6.814625, doesn't have outliers in
+# " Skewness of Wavelet Transformed image" column.
+# 
+# 
+# 
+# In figure 10 shows a square containing three data: the first quartile is equal
+# to -1.574975, the Median is the line in the middle of the big square is equal
+# to 0.61663, the third quartile is equal to 3.17925, and the points are outliers
+# in " Curtosis of Wavelet Transformed image" column for "Status" 1 only.
+# 
+# 
+# 
+# In figure 11 shows a square containing three data: the first quartile is equal
+# to -2.41345, the Median is the line in the middle of the big square is equal 10
+# to -0.58665, the third quartile is equal to 0.39481 , and the points are
+# outliers in " Entropy of image" column for each "Status".
+# 
+
+# In[76]:
+
+
+sns.regplot(x=dd['Variance of Wavelet Transformed image'], y=dd['Skewness of Wavelet Transformed image'])
+
+
+# In[77]:
+
+
+sns.regplot(x=dd['Variance of Wavelet Transformed image'], y=dd['Curtosis of Wavelet Transformed image'])
+
+
+# In figure 12 shows the relationship between column Variance of Wavelet
+# Transformed image and column Curtosis of Wavelet Transformed image
+# that appeared through the diagram "Scatter plots and Regression Line" and
+# the relationship was (weak negative) and the correlation value is equal to -0.380850.
+
+# In[78]:
+
+
+sns.regplot(x=dd['Variance of Wavelet Transformed image'], y=dd['Entropy of image'])
+
+
+# In[79]:
+
+
+sns.regplot(x=dd['Curtosis of Wavelet Transformed image'], y=dd['Entropy of image'])
+
+
+# In[80]:
+
+
+sns.regplot(x=dd['Skewness of Wavelet Transformed image'], y=dd['Entropy of image'])
+
+
+# In figure 13 shows the relationship between column Curtosis of Wavelet
+# Transformed image and column Entropy of image that appeared through
+# the diagram "Scatter plots and Regression Line" and the relationship was
+# (Weak Positive) and the correlation value is equal to 0.318841.
+
+# In[81]:
+
+
+sns.regplot(x=dd['Skewness of Wavelet Transformed image'], y=dd['Curtosis of Wavelet Transformed image'])
+
+
+# In figure 13 shows the relationship between column Skewness of Wavelet
+# Transformed image and column Curtosis of Wavelet Transformed image
+# that appeared through the diagram "Scatter plots and Regression Line" and
+# the relationship was (Strong negative) and the correlation value is equal to
+# -0.786895.
+
+# In[82]:
+
+
+le = LabelEncoder()
+le.fit(dd['Status'].values)
+y = le.transform(dd['Status'].values)
+X = dd.drop('Status', axis=1).values
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.35, stratify=y, random_state=seed)
+
+
+# In[83]:
+
+
+max_depth_range = list(range(2, 8))
+accuracy = []
+for depth in max_depth_range:
+    
+    clf = DecisionTreeClassifier(criterion='entropy',
+                              min_samples_split=7,
+                              max_depth= depth,
+                              random_state=seed)
+    clf.fit(X_train, y_train)
+    score = clf.score(X_test, y_test)
+    accuracy.append(score) 
+plt.plot(max_depth_range,accuracy)
+plt.xlabel('max_depth')
+plt.ylabel('accuracy')
+
+
+# In[84]:
+
+
+tree = DecisionTreeClassifier(criterion='entropy',
+                              min_samples_split=7,
+                              max_depth=6,
+                              random_state=seed)
+tree.fit(X_train, y_train)
+y_pred = tree.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+print('DecisionTreeClassifier accuracy score: {}'.format(accuracy))
+
+
+# In[85]:
+
+
+print('Confusion Matrix is')
+print(confusion_matrix(y_test, y_pred))
+cm=confusion_matrix(y_test, y_pred)
+plt.matshow(cm)
+plt.show()
+
+
+# In[86]:
+
+
+print(classification_report(y_test, y_pred, labels=dd['Status'].unique()))
+
+
+# In[94]:
+
+
+os.environ["PATH"] += os.pathsep + 'C:/Program Files (x86)/Graphviz2.38/bin'
+def plot_tree(tree, dataframe, label_col, label_encoder, plot_title):
+    label_names = ['forged','genuine']
+    graph_data = export_graphviz(tree,
+                                 feature_names=dataframe.drop(label_col, axis=1).columns,
+                                 class_names=label_names,
+                                 filled=True,
+                                 rounded=True,
+                                 out_file=None)
+    graph = graphviz.Source(graph_data)
+    graph.render(plot_title, view = True)
+    return graph
+tree_graph = plot_tree(tree, dd, 'Status', le, 'Tree DataSet Bank')
+tree_graph
+
+
+# In figure 24, tree illustration shows us how the system has classified the
+# banknotes, are they fake or not?, We notice in Figure 24 that the root took
+# a column (Variance of Wavelet Transformed image) And gave it the
+# condition that the data be less or equal to 0.754 and if the condition
+# matches the condition goes to true and if it does not go to false then the
+# system applies another condition to a different column even the value
+# (entropy) reaches zero. the blue box is mean genuine and orange box is
+# mean forged.
+
+# In[ ]:
+
+
+
+
